@@ -1,9 +1,12 @@
 # Assignment 4 - Text classification
  
+#### Link to GitHub of this assignment: https://github.com/sarah-hvid/Assignment4
+ 
 ## Assignment description
 In this assignment it should be predicted whether textual data is toxic or non-toxic, using two different methods:
 - Machine learning approach using a ```TfidfVectorizer()``` and a ```LogisticRegression()``` classifier
 - Deep learning approach using a Keras ```Embedding``` layer and a Convolutional Neural Network
+
 The full assignment description is available in the ```assignment4.md``` file.
 
 ## Methods
