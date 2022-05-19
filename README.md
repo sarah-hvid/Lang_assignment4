@@ -1,6 +1,6 @@
 # Assignment 4 - Text classification
  
-#### Link to GitHub of this assignment: https://github.com/sarah-hvid/Assignment4
+#### Link to GitHub of this assignment: https://github.com/sarah-hvid/Lang_assignment4
  
 ## Assignment description
 In this assignment it should be predicted whether textual data is toxic or non-toxic, using two different methods:
