@@ -19,17 +19,43 @@ This problem relates to classification of text. Initially, the data was split in
   - A tokenizer is created and fitted to the data. The CNN model is then created. The number of epochs, the batch size and the embedding dimension size of the embedding layer may be specified by the user. The model was then fitted to the data. The classification report is saved in the output folder. 
 
 ## Usage
-In order to run the scripts, certain modules need to be installed. These can be found in the ```requirements.txt``` file. The folder structure must be the same as in the GitHub repository. The current working directory when running the script must be the one that contains the ```data```, ```output``` and ```src``` folder. Examples of how to run the scripts from the command line: 
+In order to run the scripts, certain modules need to be installed. These can be found in the ```requirements.txt``` file. The folder structure must be the same as in this GitHub repository (ideally, clone the repository).
+```bash
+git clone https://github.com/sarah-hvid/Lang_assignment4.git
+cd Lang_assignment4
+pip install -r requirements.txt
+```
+The folder structure must be the same as in the GitHub repository. The current working directory when running the script must be the one that contains the ```data```, ```output``` and ```src``` folder.\
+\
+How to run the scripts from the command line: 
 
-The tfidf-vectorizer script:
-- python src/tfidfvectorizer.py
-- python src/tfidfvectorizer.py -max_df 0.8 -min_df 0.1 -max_features 500
-
-The embeddings script:
-- python src/embeddings.py
-- python transfer_learning.py -epochs 2 -batch_size 128 -embed_size 300
+__The tfidf-vectorizer script__\
+Standard values:
+```bash
+python src/tfidfvectorizer.py
+```
+Specified parameters:
+```bash
+python src/tfidfvectorizer.py -max_df 0.8 -min_df 0.1 -max_features 500
+```
+__The embeddings script__\
+Standard values:
+```bash
+python src/embeddings.py
+```
+Specified parameters:
+```bash
+python src/embeddings.py -epochs 2 -batch_size 128 -embed_size 300
+```
   
 Examples of the outputs of the scripts may be seen in the ```output``` folder. 
 
 ## Results
 The machine learning approach is clearly struggling with this data. It initially seems like the classifier is doing well, but upon further inspection it can be seen that the model simply classifies everything, or almost everything, as non-toxic. This may be related to the small amount of toxic data available for training. The deep learning approach achieved better results, but still only an accuracy (f1-score) of 0.6 - 0.7. Overall, I believe more data is required to improve the accuracy for both approaches. 
+
+![image]()
+
+
+**Standard plot**
+
+<img src="/output/nx_standard_H5.png" width="500" height="400">
