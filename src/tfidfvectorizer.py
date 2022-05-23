@@ -1,5 +1,5 @@
 """
-A script that performs a classification using a tfidfvectorizer and a logistic regression classifier.
+A script that performs a classification using a tfidf-vectorizer and a logistic regression classifier.
 """
 
 # system tools
@@ -31,7 +31,7 @@ def parse_args():
     ap = argparse.ArgumentParser()
     
     # command line parameters
-    ap.add_argument("-f", "--file_input", required = False, default = os.path.join('data', 'VideoCommentsThreatCorpus.csv'), help = "A CSV file", type = int)
+    ap.add_argument("-f", "--file_input", required = False, default = os.path.join('data', 'VideoCommentsThreatCorpus.csv'), help = "A CSV file")
     ap.add_argument("-max_df", "--max_df", required = False, default = 0.95, help = "cut-off to remove very common words", type=float)
     ap.add_argument("-min_df", "--min_df", required = False, default = 0.05, help = "cut-off to remove very rare words", type = float)
     ap.add_argument("-max_features", "--max_features", required = False, default = 500, help = "the number of features to keep in the vocabulary ordered by frequency", type = int)
@@ -49,6 +49,7 @@ def remove_accented_chars(text):
     '''
     text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8', 'ignore')
     return text
+
 
 def pre_process_corpus(docs):
     '''
@@ -128,22 +129,23 @@ def classify(X_train_feats, X_test_feats, y_train, y_test):
     y_train: the training data labels
     y_test: the testing data labels
     '''
+    args = parse_args()
+    
+    MAX_DF = args['max_df']
+    MIN_DF = args['min_df']
+    MAX_FEATURES = args['max_features']
+    
+    labels = ['non-toxic', 'toxic']
+    
     classifier = LogisticRegression().fit(X_train_feats, y_train)
     
     y_pred = classifier.predict(X_test_feats)
     
-    report = metrics.classification_report(y_test, y_pred)
+    report = metrics.classification_report(y_test, y_pred, target_names = labels)
     print(report)
     
-    with open("output/tfidf_report.txt", "w") as f:
+    with open(f"output/tfidf_{MAX_DF}_{MIN_DF}_{MAX_FEATURES}_report.txt", "w") as f:
         print(report, file=f)
-        
-    
-    labels = ['non-toxic', 'toxic']
-    df = pd.DataFrame(confusion_matrix(y_test, y_pred), 
-                 index=labels, columns=labels)
-    print(df)
-    
     
     return
 

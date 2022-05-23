@@ -41,7 +41,7 @@ def parse_args():
     ap = argparse.ArgumentParser()
     
     # command line parameters
-    ap.add_argument("-f", "--file_input", required = False, default = os.path.join('data', 'VideoCommentsThreatCorpus.csv'), help = "A CSV file", type = int)
+    ap.add_argument("-f", "--file_input", required = False, default = os.path.join('data', 'VideoCommentsThreatCorpus.csv'), help = "A CSV file")
     ap.add_argument("-epochs", "--epoch_num", required = False, default = 5, help = "number of epochs", type = int)
     ap.add_argument("-batch_size", "--batch_size", required = False, default = 128, help = "the batch size", type = int)
     ap.add_argument("-embed_size", "--embed_size", required = False, default = 300, help = "the number of dimensions for embeddings", type = int)
@@ -79,8 +79,8 @@ def preprocess_corpus(docs):
         doc = re.sub(' +', ' ', doc)
         doc = doc.strip()  
         norm_docs.append(doc)
-  
-  return norm_docs
+    
+    return norm_docs
 
 
 # functions for data preprocessing
@@ -207,20 +207,22 @@ def evaluate_model(model, X_test_pad, y_test):
     X_test_pad: preprocessed testing data
     y_test: testing data labels
     '''
+    args = parse_args()
+    
+    EPOCHS = args['epoch_num']
+    BATCH_SIZE = args['batch_size']
+    EMBED_SIZE = args['embed_size']
+    
     labels = ['non-toxic', 'toxic']
 
     # creating predictions of the model
     predictions = (model.predict(X_test_pad) > 0.5).astype("int32")
     
-    # creating classification report and confusion matrix and saving the results
-    report = classification_report(y_test, predictions)
+    # creating classification report and saving the results
+    report = classification_report(y_test, predictions, target_names = labels)
     print(report)
     
-    df = pd.DataFrame(confusion_matrix(y_test, predictions), 
-                 index=labels, columns=labels)
-    print(df)
-    
-    with open("output/embeddings_report.txt", "w") as f:
+    with open(f"output/embeddings_{EPOCHS}_{BATCH_SIZE}_{EMBED_SIZE}_report.txt", "w") as f:
             print(report, file=f)
     
     return 
