@@ -1,22 +1,6 @@
 """
 A script that performs a classification using embeddings and a CNN.
-As input, provide the data in the data folder. 
-
-Usage example:
-    $ python src/embeddings.py
-    
-    With all specifications:
-    $ python embeddings.py -epochs 2 -batch_size 128 -embed_size 300
-    
-    
-Requirements:
-The folder structure must be the same as in the GitHub repository.
-The current working directory when running the script must be the one that contains the data, output and src folder. 
-The output folder must be named output.
-
 """
-
-#----------------------------- importing packages --------------------------------------
 
 # system tools
 import argparse
@@ -48,17 +32,19 @@ from sklearn.metrics import (confusion_matrix,
 from sklearn.model_selection import train_test_split
 
 
-#----------------------------- creating functions --------------------------------------
-
 # argument function
 def parse_args():
+    '''
+    Function that specifies the available commandline arguments
+    '''
     # Initialise argparse
     ap = argparse.ArgumentParser()
     
     # command line parameters
-    ap.add_argument("-epochs", "--epoch_num", required = False, help = "number of epochs", type = int)
-    ap.add_argument("-batch_size", "--batch_size", required = False, help = "the batch size", type = int)
-    ap.add_argument("-embed_size", "--embed_size", required = False, help = "the number of dimensions for embeddings", type = int)
+    ap.add_argument("-f", "--file_input", required = False, default = os.path.join('data', 'VideoCommentsThreatCorpus.csv'), help = "A CSV file", type = int)
+    ap.add_argument("-epochs", "--epoch_num", required = False, default = 5, help = "number of epochs", type = int)
+    ap.add_argument("-batch_size", "--batch_size", required = False, default = 128, help = "the batch size", type = int)
+    ap.add_argument("-embed_size", "--embed_size", required = False, default = 300, help = "the number of dimensions for embeddings", type = int)
         
     args = vars(ap.parse_args())
     return args
@@ -66,28 +52,44 @@ def parse_args():
 
 # functions for text processing
 def remove_accented_chars(text):
-  text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8', 'ignore')
-  return text
+    '''
+    Function that removes accented characters.
 
-def pre_process_corpus(docs):
-  norm_docs = [] 
-  for doc in docs:
-    doc = doc.translate(doc.maketrans("\n\t\r", "   "))
-    doc = doc.lower()
-    doc = remove_accented_chars(doc)
-    doc = contractions.fix(doc)
-    # lower case and remove special characters\whitespaces
-    doc = re.sub(r'[^a-zA-Z0-9\s]', '', doc, re.I|re.A)
-    doc = re.sub(' +', ' ', doc)
-    doc = doc.strip()  
-    norm_docs.append(doc)
+    text: text in string format
+    '''
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8', 'ignore')
+    return text
+
+
+def preprocess_corpus(docs):
+    '''
+    Function that preprocesses text data by removing special characters and lowercasing it.
+
+    docs: text data in an iterable format
+    '''
+    norm_docs = [] 
+    for doc in docs:
+        doc = doc.translate(doc.maketrans("\n\t\r", "   "))
+        doc = doc.lower()
+        doc = remove_accented_chars(doc)
+        doc = contractions.fix(doc)
+
+        # lower case and remove special characters\whitespaces
+        doc = re.sub(r'[^a-zA-Z0-9\s]', '', doc, re.I|re.A)
+        doc = re.sub(' +', ' ', doc)
+        doc = doc.strip()  
+        norm_docs.append(doc)
   
   return norm_docs
 
 
 # functions for data preprocessing
-def load_data():
-    filepath = os.path.join('data', 'VideoCommentsThreatCorpus.csv')
+def load_data(filepath):
+    '''
+    Function that loads the data CSV file and splits it into 80% training and 20% testing data.
+
+    filepath: the path to the CSV file    
+    '''
     data = pd.read_csv(filepath)
     
     labels = data['label'].values # keeping the data as a numpy array
@@ -100,13 +102,17 @@ def load_data():
     return X_train, X_test, y_train, y_test
 
 
-
 def preprocess_data(X_train, X_test):
-    
+    '''
+    Function that preprocesses the training data by creating and fitting a tokenizer.
+
+    X_train: the training data text as a numpy array
+    X_test: the testing data text as a numpy array
+    '''
     MAX_SEQUENCE_LENGTH = 1000
     
-    X_train_norm = pre_process_corpus(X_train)
-    X_test_norm = pre_process_corpus(X_test)
+    X_train_norm = preprocess_corpus(X_train)
+    X_test_norm = preprocess_corpus(X_test)
     
     # define out-of-vocabulary token
     t = Tokenizer(oov_token = '<UNK>')
@@ -129,6 +135,13 @@ def preprocess_data(X_train, X_test):
 
 # functions for model building
 def compile_model(t, X_train_pad, y_train):
+    '''
+    Function that compiles a CNN model with an embedding layer and trains it on training data.
+
+    t: tokenizer that has been fitted to the data
+    X_train_pad: preprocessed training data
+    y_train: training data labels
+    '''
         
     MAX_SEQUENCE_LENGTH = 1000
     # overall vocabulary size
@@ -139,22 +152,6 @@ def compile_model(t, X_train_pad, y_train):
     EPOCHS = args['epoch_num']
     BATCH_SIZE = args['batch_size']
     EMBED_SIZE = args['embed_size']
-    
-    if EPOCHS == None:
-        EPOCHS = 1
-    else:
-        pass
-    
-    if BATCH_SIZE == None:
-        BATCH_SIZE = 128
-    else:
-        pass
-    
-    if EMBED_SIZE == None:
-        EMBED_SIZE = 300
-    else:
-        pass
-
 
     # create the model
     model = Sequential()
@@ -192,23 +189,30 @@ def compile_model(t, X_train_pad, y_train):
                             optimizer='adam', 
                             metrics=['accuracy'])
 
-    
+    # fit the model to the data
     h = model.fit(X_train_pad, y_train,
               epochs = EPOCHS,
               batch_size = BATCH_SIZE,
               validation_split = 0.1,
-              verbose = 2)  # don't print each epoch
+              verbose = 2)
     
     return model
 
 
 def evaluate_model(model, X_test_pad, y_test):
-    
+    '''
+    Function that evaluates the model performance on the test data. It also prints and saves the results.
+
+    model: a tensorflow model object.
+    X_test_pad: preprocessed testing data
+    y_test: testing data labels
+    '''
     labels = ['non-toxic', 'toxic']
-    
-    # 0.5 decision boundary
+
+    # creating predictions of the model
     predictions = (model.predict(X_test_pad) > 0.5).astype("int32")
     
+    # creating classification report and confusion matrix and saving the results
     report = classification_report(y_test, predictions)
     print(report)
     
@@ -221,15 +225,24 @@ def evaluate_model(model, X_test_pad, y_test):
     
     return 
     
-#----------------------------- process of the script --------------------------------------
 
 def main():
-    
-    X_train, X_test, y_train, y_test = load_data()
+    '''
+    The process of the script.
+    '''
+    args = parse_args()
+    file_input = args['file_input']
+    file_path = os.path.join(file_input)
+
+    print('[INFO] Loading data')
+    X_train, X_test, y_train, y_test = load_data(file_path)
     t, X_train, X_test = preprocess_data(X_train, X_test)
+    print('[INFO] compilling model ...')
     model = compile_model(t, X_train, y_train)
     evaluate_model(model, X_test, y_test)
-    
+
+    print('[INFO] script success')
+
     return
                 
 

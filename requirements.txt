@@ -1,1 +1,8 @@
-pip install argparse, unicodedata, contractions, tensorflow, scikit-learn
+# packages
+argparse
+pandas
+numpy
+unicodedata2
+contractions
+tensorflow
+scikit-learn
