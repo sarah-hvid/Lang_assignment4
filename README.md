@@ -52,7 +52,7 @@ python src/embeddings.py -epochs 2 -batch_size 128 -embed_size 300
 Examples of the outputs of the scripts may be seen in the ```output``` folder. 
 
 ## Results
-The machine learning approach is clearly struggling with this data. It initially seems like the classifier is doing well, but upon further inspection it can be seen that the model simply classifies almost everything as non-toxic. This may be related to the small amount of toxic data available for training. The deep learning approach achieved better results, but still only an F1-score of 0.6 - 0.7. Overall, I believe more data is required to improve the accuracy for both approaches.\
+The machine learning approach is clearly struggling with this data. It initially seems like the classifier is doing well, but upon further inspection it can be seen that the model simply classifies almost everything as non-toxic. This may be related to the small amount of toxic data available for training. The deep learning approach achieved better results, but still only an F1-score of 0.60. Overall, I believe more data is required to improve the accuracy for both approaches.\
 \
 **Classification report: tfidf**
 
